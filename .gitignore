@@ -1,0 +1,31 @@
+# Ignore dataset CSV files and folders
+**/csv/
+**/*.csv
+
+# Ignore virtual environment directories (common names)
+venv/
+env/
+.venv/
+venv3/
+
+# Ignore environment files that may contain secrets
+.env
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# VSCode settings
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Logs
+.log

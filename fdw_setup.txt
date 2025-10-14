@@ -1,0 +1,27 @@
+-- Enable Foreign Data Wrapper
+CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+
+-- Create server pointing to secondary laptop
+CREATE SERVER citations_server
+FOREIGN DATA WRAPPER postgres_fdw
+OPTIONS (host '192.168.41.167', dbname 'citations', port '5432');
+
+-- Map user credentials
+CREATE USER MAPPING FOR postgres
+SERVER citations_server
+OPTIONS (user 'postgres', password '12345');
+
+-- Import the tables you need
+IMPORT FOREIGN SCHEMA public
+FROM SERVER citations_server
+INTO public
+LIMIT TO (papers, citations);
+
+
+
+
+SELECT dblp.title, cit.cited_doi
+FROM papers AS dblp
+JOIN citations AS cit
+ON dblp.doi = cit.citing_doi
+LIMIT 10;
