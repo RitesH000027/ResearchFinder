@@ -42,7 +42,7 @@ def build_year_condition(year: str) -> str:
     
     return f"pub_date >= '{year}-01-01'"
 
-def build_specific_paper_query(paper_title: str) -> str:
+def build_specific_paper_query(paper_title: str, result_count: int = 5) -> str:
     """
     Create a SQL query to find a specific paper by its title.
     Returns a complete SQL query string.
@@ -54,7 +54,7 @@ def build_specific_paper_query(paper_title: str) -> str:
     
     # Sanitize the paper title to prevent SQL injection
     sanitized_title = paper_title.replace("'", "''")
-    return f"SELECT id, title, author, pub_date, venue, type FROM papers WHERE title ILIKE '%{sanitized_title}%' LIMIT 10"
+    return f"SELECT id, title, author, pub_date, venue, type FROM papers WHERE title ILIKE '%{sanitized_title}%' LIMIT {result_count}"
 
 def build_fallback_keyword_query(query: str) -> str:
     """
@@ -87,7 +87,8 @@ def build_sql_query(parsed_query: Dict[str, Any], original_query: str) -> str:
     """
     # Handle specific paper lookup as a special case
     if parsed_query.get('specific_paper_lookup'):
-        return build_specific_paper_query(parsed_query.get('specific_paper_title', ''))
+        result_count = parsed_query.get('result_count', 5)
+        return build_specific_paper_query(parsed_query.get('specific_paper_title', ''), result_count)
     
     # Start building the general query - explicitly list the columns we need
     # Use only the columns that actually exist in the database:
@@ -117,7 +118,8 @@ def build_sql_query(parsed_query: Dict[str, Any], original_query: str) -> str:
         if fallback_condition:
             sql += f" WHERE {fallback_condition}"
     
-    # Limit results for performance and readability
-    sql += " LIMIT 10"
+    # Use the user-specified count or default to 5
+    result_count = parsed_query.get('result_count', 5)
+    sql += f" LIMIT {result_count}"
     
     return sql

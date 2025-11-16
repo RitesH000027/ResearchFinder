@@ -24,6 +24,7 @@ try:
     from .llm_parser import parse_query_with_llm
     from .federated_engine import query_papers_db
     from .llm_postprocess import postprocess_with_llm
+    from .local_summarizer import postprocess_with_local_llm
 except ImportError as e:
     print(f"Import error: {e}")
     print(f"Current sys.path: {sys.path}")
@@ -147,6 +148,11 @@ def run_query():
                         paper_dict['citation_count'] = citation_data.get('citation_count', 0)
                         paper_dict['citations'] = citation_data.get('citations', [])
                         paper_dict['citation_source'] = citation_data.get('source', 'unknown')
+                        
+                        # Only include citation data in output if it's from a real source
+                        if citation_data.get('source') == 'simulated':
+                            # Don't include simulated citation counts in individual paper display
+                            paper_dict.pop('citation_count', None)
                     
                     papers_with_citations.append(paper_dict)
             
@@ -198,7 +204,7 @@ def run_query():
     topic = parsed_query.get('topic', 'this research area')
     
     # Display formatted results
-    print(f"Found {len(papers_results)} papers about '{topic}' published {time_period}.\n")
+    print(f"Found {len(papers_results)} papers about {topic or 'this research area'} published {time_period}.\n")
     
     # Print each paper in a readable format
     for i, paper in enumerate(papers_with_citations[:10]):
@@ -207,21 +213,34 @@ def run_query():
         author = paper.get('author', '')
         if author:
             print(f"    Author: {author[:100]}")
-        if citation_priority and 'citation_count' in paper:
+        # Only show citation counts from real sources (not simulated)
+        if citation_priority and 'citation_count' in paper and paper.get('citation_source') != 'simulated':
             print(f"    Citations: {paper.get('citation_count', 0)}")
         print("")
     
-    # Process unstructured query part with LLM for research analysis
-    print("=== RESEARCH ANALYSIS ===")
-    unstructured_instruction = llm_parsed.get('unstructured', f"Summarize papers about {topic}")
-    print(f"Analysis goal: {unstructured_instruction}")
+    # Only show research analysis if explicitly requested
+    want_summary = parsed_query.get('want_summary', False)
     
-    # Create a list of paper titles for analysis
-    paper_titles = [p.get('title', '') for p in papers_with_citations]
-    
-    # Use the LLM for analysis
-    llm_analysis = postprocess_with_llm(paper_titles, unstructured_instruction)
-    print(llm_analysis)
+    if want_summary:
+        print("=== RESEARCH ANALYSIS ===")
+        unstructured_instruction = llm_parsed.get('unstructured', f"Summarize papers about {topic}")
+        print(f"Analysis goal: {unstructured_instruction}")
+        
+        # Create a list of paper titles for analysis
+        paper_titles = [p.get('title', '') for p in papers_with_citations]
+        
+        # Try LLM analysis first, fallback to local analysis
+        try:
+            llm_analysis = postprocess_with_llm(papers_with_citations, unstructured_instruction)
+            # Check if we got a proper analysis or just an error message
+            if "error" in llm_analysis.lower() or "api key not configured" in llm_analysis.lower():
+                print("🔄 Using local analysis (AI API unavailable)")
+                llm_analysis = postprocess_with_local_llm(papers_with_citations, unstructured_instruction)
+        except Exception as e:
+            print(f"🔄 Using local analysis (AI API failed: {e})")
+            llm_analysis = postprocess_with_local_llm(papers_with_citations, unstructured_instruction)
+        
+        print(llm_analysis)
     
     # Print summary statistics
     print_summary_statistics(papers_with_citations, query)
@@ -254,6 +273,7 @@ if __name__ == "__main__":
         from federated_query.llm_parser import parse_query_with_llm
         from federated_query.federated_engine import query_papers_db
         from federated_query.llm_postprocess import postprocess_with_llm
+        from federated_query.local_summarizer import postprocess_with_local_llm
     except ImportError as e:
         print(f"Error when importing modules for direct execution: {e}")
         sys.exit(1)

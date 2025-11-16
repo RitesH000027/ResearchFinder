@@ -1,31 +1,84 @@
-# Ignore dataset CSV files and folders
+# Dataset and data files
 **/csv/
 **/*.csv
+*.xml
+*.txt
+data/
+temp/
+2022-*/
 
-# Ignore virtual environment directories (common names)
+# Virtual environment directories
 venv/
 env/
 .venv/
 venv3/
 
-# Ignore environment files that may contain secrets
+# Environment variables and secrets
 .env
+.env.local
+.env.*.local
+*.key
+*_key.txt
+api_keys.txt
+secrets.txt
+
+# Configuration files with sensitive data
+config.ini
+settings.ini
+credentials.json
 
 # Python cache and build artifacts
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
 
 # Distribution / packaging
 build/
 dist/
 *.egg-info/
+.eggs/
 
-# VSCode settings
+# Development and testing
+test_*.py
+diagnose_*.py
+check_*.py
+*_test.py
+
+# IDE and editor files
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# MacOS
+# OS files
 .DS_Store
+Thumbs.db
 
-# Logs
-.log
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Documentation build
+docs/_build/
+
+# Secondary machine specific files
+scripts/
+latex/
+setup_*.sh
+setup_*.bat
+install_*.sh
+install_*.bat
+*_secondary*

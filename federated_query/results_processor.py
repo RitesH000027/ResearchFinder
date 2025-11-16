@@ -204,10 +204,18 @@ def print_summary_statistics(papers: List[Dict[str, Any]], query: str) -> None:
     
     stats = get_result_statistics(papers)
     
+    # Check if we're using simulated citation data
+    using_simulated = any(paper.get('citation_source') == 'simulated' for paper in papers if 'citation_source' in paper)
+    
     print(f"\n--- Summary Statistics for Query: \"{query}\" ---")
     print(f"Total papers found: {stats['total_papers']}")
-    print(f"Total citations: {stats['citation_count']}")
-    print(f"Average citations per paper: {stats['avg_citations']:.2f}")
+    
+    # Only display citation stats if we have real citation data
+    if not using_simulated:
+        print(f"Total citations: {stats['citation_count']}")
+        print(f"Average citations per paper: {stats['avg_citations']:.2f}")
+    else:
+        print("Citation data unavailable - citation counts not shown")
     
     print("\nPublication Years:")
     for year, count in list(stats['years'].items())[:5]:  # Show top 5 years

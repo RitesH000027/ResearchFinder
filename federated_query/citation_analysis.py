@@ -11,6 +11,9 @@ import requests
 
 # Define the citation API base URL and API key
 CITATION_API_BASE_URL = "https://api.opencitations.net/v1"
+# Secondary laptop API server (running citation database)
+# Updated with the actual IP address of your secondary laptop
+LOCAL_API_BASE_URL = "http://192.168.41.167:5000"
 # In a real-world scenario, API keys would be stored in environment variables
 # but for this academic project, hardcoding is acceptable
 CITATION_API_KEY = ""
@@ -21,49 +24,143 @@ class CitationClient:
     Falls back to simulated data when the API is unavailable.
     """
     
-    def __init__(self, base_url: str = CITATION_API_BASE_URL):
+    def __init__(self, base_url: Optional[str] = None):
         """
         Initialize the citation client with the API base URL.
+        Tries local server first, then falls back to public API.
         """
-        self.base_url = base_url
+        # Try to use local server first if available
+        if base_url:
+            self.base_url = base_url
+        else:
+            # Try local server first
+            try:
+                # Use the correct health endpoint from your API server
+                response = requests.get(f"{LOCAL_API_BASE_URL}/api/status", timeout=1)
+                if response.status_code == 200:
+                    print("Using local citation API server at", LOCAL_API_BASE_URL)
+                    self.base_url = LOCAL_API_BASE_URL
+                else:
+                    self.base_url = CITATION_API_BASE_URL
+            except Exception as e:
+                # If local server not available, use public API
+                print(f"Cannot connect to local citation API: {str(e)}")
+                self.base_url = CITATION_API_BASE_URL
+        
         self.api_key = CITATION_API_KEY
         
-    def get_citations_for_paper(self, paper_doi: str) -> Dict[str, Any]:
+    def get_citations_for_paper(self, paper_id: str) -> Dict[str, Any]:
         """
-        Get citation count and details for a paper by its DOI.
-        Falls back to simulated citation data if the API call fails.
+        Get citation count and details for a paper using its identifier.
+        Falls back to simulated citation data if the API call fails or no DOI is found.
         
         Args:
-            paper_doi: The DOI of the paper
+            paper_id: The paper identifier (might contain a DOI or other identifiers)
             
         Returns:
             A dictionary with citation count and details
         """
-        if not paper_doi or paper_doi.lower() == "none" or paper_doi.strip() == "":
+        if not paper_id or paper_id.lower() == "none" or paper_id.strip() == "":
             return self._generate_simulated_citation_data()
         
         try:
             # Add a small delay to avoid overwhelming the API
             time.sleep(0.5)
             
+            # Paper IDs might be in various formats:
+            # - "doi:10.1234/abcd meta:something"  (contains explicit DOI)
+            # - "10.1234/abcd"                     (raw DOI)
+            # - "orcid:0000-0003-1414-3507 meta:ra/0614082260"  (no DOI)
+            # - "meta:ra/061010322262"             (metadata only)
+            # - "isbn:9789400767386 doi:10.1007/978-94-007-6738-6"  (DOI after other identifiers)
+            
+            doi_value = None
+            
+            # Method 1: Check if paper_id contains OpenCitations ID (meta:br/ format)
+            if "meta:br/" in paper_id.lower():
+                # Extract the OpenCitations ID after "meta:"
+                meta_parts = paper_id.lower().split("meta:")[1].split()
+                doi_value = meta_parts[0] if meta_parts else None
+                # Remove "meta:" prefix to get just "br/xxxx"
+                if doi_value and doi_value.startswith("br/"):
+                    doi_value = "omid:" + doi_value  # Citation DB expects "omid:br/xxxx"
+            # Method 2: Check if paper_id contains "doi:" prefix (fallback)
+            elif "doi:" in paper_id.lower():
+                # Extract just the DOI value between "doi:" and the next space or end
+                doi_parts = paper_id.lower().split("doi:")[1].split()
+                doi_value = doi_parts[0] if doi_parts else None
+            # Method 3: Check if it looks like a raw DOI (starts with 10.)
+            elif paper_id.startswith("10."):
+                doi_value = paper_id
+            
+            # If no identifier found, fall back to simulated data
+            if not doi_value:
+                print(f"No valid identifier found in: {paper_id}")
+                return self._generate_simulated_citation_data()
+            
             # Prepare the API endpoint and headers
-            endpoint = f"{self.base_url}/metadata/{paper_doi}"
+            # Try both metadata and citations endpoints
+            if self.base_url == LOCAL_API_BASE_URL:
+                # Local API has a different endpoint structure
+                # This matches the routes in your api_server.py
+                endpoint = f"{self.base_url}/api/paper/citations/{doi_value}"
+            else:
+                endpoint = f"{self.base_url}/metadata/{doi_value}"
+                
             headers = {"Accept": "application/json"}
             if self.api_key:
                 headers["Authorization"] = f"Bearer {self.api_key}"
+            
+            # Debug info to see what IDs we're using
+            print(f"Requesting citation data for ID: {doi_value} (from {paper_id})")
             
             # Make the API call
             response = requests.get(endpoint, headers=headers, timeout=10)
             
             if response.status_code == 200:
                 data = response.json()
-                return {
-                    'citation_count': data.get('citation_count', 0),
-                    'citations': data.get('citations', []),
-                    'source': 'opencitations_api'
-                }
+                
+                # Handle different response formats based on the API source
+                if self.base_url == LOCAL_API_BASE_URL:
+                    # Your local API format includes status, count, and citations
+                    if data.get('status') == 'ok':
+                        return {
+                            'citation_count': data.get('count', 0),
+                            'citations': data.get('citations', []),
+                            'source': 'local_api'
+                        }
+                else:
+                    # OpenCitations API format
+                    return {
+                        'citation_count': data.get('citation_count', 0),
+                        'citations': data.get('citations', []),
+                        'source': 'citations_api'
+                    }
             else:
                 print(f"Citation API returned status code {response.status_code}")
+                
+                # If using the public API, try the local API as fallback
+                if self.base_url == CITATION_API_BASE_URL:
+                    try:
+                        fallback_endpoint = f"{LOCAL_API_BASE_URL}/api/paper/citations/{doi_value}"
+                        print(f"Trying local API fallback: {fallback_endpoint}")
+                        fallback_response = requests.get(fallback_endpoint, timeout=5)
+                        
+                        if fallback_response.status_code == 200:
+                            data = fallback_response.json()
+                            if data.get('status') == 'ok':
+                                return {
+                                    'citation_count': data.get('count', 0),
+                                    'citations': data.get('citations', []),
+                                    'source': 'local_api'
+                                }
+                    except Exception as e:
+                        print(f"Local API fallback failed: {str(e)}")
+                
+                # If all APIs fail, use simulated data
+                return self._generate_simulated_citation_data()
+                
+                # If all APIs fail, use simulated data
                 return self._generate_simulated_citation_data()
         except Exception as e:
             print(f"Error fetching citations: {str(e)}")

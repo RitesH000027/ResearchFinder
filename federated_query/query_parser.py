@@ -91,6 +91,47 @@ def extract_specific_paper_title(query: str) -> Optional[str]:
             
     return None
 
+def extract_result_count(query: str) -> int:
+    """
+    Extract the number of results requested by the user.
+    Returns a number between 1-100, defaults to 5 if not specified.
+    """
+    query_lower = query.lower()
+    
+    # Look for patterns like "find 10 papers" or "top 20 papers"
+    count_patterns = [
+        r'(?:find|get|retrieve|show)\s+(\d+)\s+(?:papers|articles|results)',
+        r'top\s+(\d+)\s+(?:papers|articles|results)',
+        r'(\d+)\s+(?:papers|articles|results)\s+(?:about|on)',
+    ]
+    
+    for pattern in count_patterns:
+        match = re.search(pattern, query_lower)
+        if match:
+            # Extract the count and ensure it's reasonable
+            try:
+                count = int(match.group(1))
+                return min(max(count, 1), 100)  # Limit between 1-100
+            except ValueError:
+                pass
+    
+    # Default to 5 results if no count specified
+    return 5
+
+def detect_summary_request(query: str) -> bool:
+    """
+    Determine if the user is asking for a summary or analysis of the papers.
+    Returns True if summary/analysis is requested, False otherwise.
+    """
+    query_lower = query.lower()
+    summary_keywords = [
+        'summarize', 'summary', 'analyze', 'analysis', 'explain',
+        'compare', 'contrast', 'review', 'insight', 'trend',
+        'what are the main', 'key findings', 'highlight'
+    ]
+    
+    return any(keyword in query_lower for keyword in summary_keywords)
+
 def extract_query_components(query: str) -> Dict[str, Any]:
     """
     Main entry point for parsing a natural language query.
@@ -99,13 +140,31 @@ def extract_query_components(query: str) -> Dict[str, Any]:
     topic, year = extract_topic_and_time(query)
     citation_priority = detect_citation_focus(query)
     specific_paper_title = extract_specific_paper_title(query) if citation_priority else None
+    result_count = extract_result_count(query)
+    want_summary = detect_summary_request(query)
     
     result = {
         'topic': topic,
         'year': year,
         'citation_priority': citation_priority,
         'specific_paper_lookup': specific_paper_title is not None,
-        'specific_paper_title': specific_paper_title
+        'specific_paper_title': specific_paper_title,
+        'result_count': result_count,
+        'want_summary': want_summary
     }
-    
+
+    # Print a concise decomposition of the parsed query so users can see
+    # how the system interpreted their input. This helps debugging and
+    # understanding of downstream behavior.
+    try:
+        print(
+            f"[Query Decomposition] topic={result['topic']!r}, year={result['year']!r}, "
+            f"citation_priority={result['citation_priority']}, specific_paper_title={result['specific_paper_title']!r}, "
+            f"result_count={result['result_count']}, want_summary={result['want_summary']}"
+        )
+    except Exception:
+        # If printing fails for any reason, continue silently to avoid
+        # breaking query processing.
+        pass
+
     return result
