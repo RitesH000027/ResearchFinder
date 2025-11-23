@@ -7,6 +7,14 @@ This script provides a simple way to run research queries.
 import os
 import sys
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print(f"[>] Environment variables loaded from .env file")
+except ImportError:
+    print(f"[!] python-dotenv not installed. Install with: pip install python-dotenv")
+
 # Add the parent directory to the system path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:

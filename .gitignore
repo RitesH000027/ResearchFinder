@@ -45,11 +45,9 @@ dist/
 *.egg-info/
 .eggs/
 
-# Development and testing
-test_*.py
+# Development and testing (exclude specific test files, keep performance directory)
 diagnose_*.py
 check_*.py
-*_test.py
 
 # IDE and editor files
 .vscode/
@@ -74,11 +72,13 @@ temp/
 # Documentation build
 docs/_build/
 
-# Secondary machine specific files
-scripts/
+# Legacy files (structure now organized)
 latex/
 setup_*.sh
 setup_*.bat
 install_*.sh
 install_*.bat
 *_secondary*
+
+# Performance results (optional - can be tracked)
+# performance/performance_evaluation_results.json

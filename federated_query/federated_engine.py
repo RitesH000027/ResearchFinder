@@ -1,32 +1,32 @@
 # Handles database queries for the research system
+# Federation demonstrated through: Papers DB + Citation API + LLM processing
 import psycopg2
 import os
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
+from .config import PAPERS_DB_CONFIG
 
-def get_config():
-    """Get database configuration from environment or defaults"""
-    return {
-        "papers_db": {
-            "dbname": os.environ.get("PAPERS_DB_NAME", "opencitations_meta"),
-            "user": os.environ.get("PAPERS_DB_USER", "postgres"),
-            "password": os.environ.get("PAPERS_DB_PASSWORD", "12345"),
-            "host": os.environ.get("PAPERS_DB_HOST", "localhost"),
-            "port": os.environ.get("PAPERS_DB_PORT", "5432")
-        }
-    }
-
-def query_papers_db(sql):
-    """Query the papers database (local)"""
-    config = get_config()["papers_db"]
-    
+def get_database_connection():
+    """Get database connection for papers database."""
     try:
         conn = psycopg2.connect(
-            dbname=config["dbname"],
-            user=config["user"],
-            password=config["password"],
-            host=config["host"],
-            port=config["port"]
+            dbname=PAPERS_DB_CONFIG["dbname"],
+            user=PAPERS_DB_CONFIG["user"],
+            password=PAPERS_DB_CONFIG["password"],
+            host=PAPERS_DB_CONFIG["host"],
+            port=PAPERS_DB_CONFIG["port"]
         )
+        return conn
+    except Exception as e:
+        print(f"Failed to connect to papers database: {e}")
+        return None
+
+def query_papers_db(sql: str) -> List[Tuple]:
+    """Query the papers database."""
+    conn = get_database_connection()
+    if not conn:
+        return []
+    
+    try:
         cur = conn.cursor()
         cur.execute(sql)
         results = cur.fetchall()
@@ -34,5 +34,14 @@ def query_papers_db(sql):
         conn.close()
         return results
     except Exception as e:
-        print(f"Error querying papers DB: {e}")
+        print(f"Error querying papers database: {e}")
+        if conn:
+            conn.close()
         return []
+
+# Backward compatibility
+def get_config():
+    """Get database configuration from environment or defaults"""
+    return {
+        "papers_db": PAPERS_DB_CONFIG
+    }

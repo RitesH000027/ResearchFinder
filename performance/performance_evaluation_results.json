@@ -1,0 +1,530 @@
+{
+  "evaluation_timestamp": "2025-11-23T17:43:04.695787",
+  "system_info": {
+    "groq_api_configured": false,
+    "database_configured": true,
+    "citation_server_configured": true
+  },
+  "test_results": {
+    "pattern_matching": {
+      "success_rate": 100.0,
+      "successful_queries": 25,
+      "total_queries": 25,
+      "average_time": 0.0005047035217285157,
+      "target": 87.0,
+      "status": "PASS",
+      "detailed_results": [
+        {
+          "query": "machine learning algorithms",
+          "components": {
+            "topic": "machine learning",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0032224655151367188
+        },
+        {
+          "query": "neural network research",
+          "components": {
+            "topic": "neural network",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "computer vision papers",
+          "components": {
+            "topic": "computer vision",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "artificial intelligence",
+          "components": {
+            "topic": "artificial intelligence",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "deep learning models",
+          "components": {
+            "topic": "deep learning",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0018374919891357422
+        },
+        {
+          "query": "quantum computing applications",
+          "components": {
+            "topic": "quantum computing",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "natural language processing",
+          "components": {
+            "topic": "natural language processing",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "robotics systems",
+          "components": {
+            "topic": "robotics",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "cybersecurity research",
+          "components": {
+            "topic": "cybersecurity",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0010170936584472656
+        },
+        {
+          "query": "blockchain technology",
+          "components": {
+            "topic": "blockchain",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "most cited machine learning papers",
+          "components": {
+            "topic": "machine learning",
+            "year": null,
+            "citation_priority": true,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0010008811950683594
+        },
+        {
+          "query": "highly cited AI research",
+          "components": {
+            "topic": "artificial intelligence",
+            "year": null,
+            "citation_priority": true,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0009632110595703125
+        },
+        {
+          "query": "top cited neural networks",
+          "components": {
+            "topic": "neural networks",
+            "year": null,
+            "citation_priority": true,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "best papers in computer vision",
+          "components": {
+            "topic": "computer vision",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "influential deep learning studies",
+          "components": {
+            "topic": "deep learning",
+            "year": null,
+            "citation_priority": true,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "machine learning papers after 2020",
+          "components": {
+            "topic": "machine learning",
+            "year": "2020",
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "AI research from 2021 to 2024",
+          "components": {
+            "topic": "ai research",
+            "year": "2021",
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "neural networks published in last 5 years",
+          "components": {
+            "topic": "neural networks",
+            "year": "2020",
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "computer vision research since 2019",
+          "components": {
+            "topic": "computer vision",
+            "year": "2019",
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "quantum computing papers from recent years",
+          "components": {
+            "topic": "quantum computing",
+            "year": "2020",
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "most cited machine learning papers published after 2020",
+          "components": {
+            "topic": "machine learning",
+            "year": "2020",
+            "citation_priority": true,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "artificial intelligence research with high citations",
+          "components": {
+            "topic": "artificial intelligence",
+            "year": null,
+            "citation_priority": true,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "neural network optimization techniques from 2023",
+          "components": {
+            "topic": "neural network",
+            "year": "2023",
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        },
+        {
+          "query": "computer vision applications in medical imaging",
+          "components": {
+            "topic": "computer vision",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.004576444625854492
+        },
+        {
+          "query": "deep learning for natural language processing",
+          "components": {
+            "topic": "deep learning",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "success": true,
+          "processing_time": 0.0
+        }
+      ]
+    },
+    "sql_generation": {
+      "success_rate": 100.0,
+      "successful_queries": 9,
+      "total_queries": 9,
+      "target": 89.0,
+      "status": "PASS",
+      "detailed_results": [
+        {
+          "query": "machine learning algorithms",
+          "components": {
+            "topic": "machine learning",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "sql": "SELECT id, title, author, pub_date, venue, type FROM papers WHERE (title ILIKE '%machine learning%' OR title ILIKE '%ml%' OR title ILIKE '%data mining%' OR title ILIKE '%supervised learning%' OR title ILIKE '%classification%') LIMIT 5",
+          "valid": true
+        },
+        {
+          "query": "most cited AI papers after 2020",
+          "components": {
+            "topic": "artificial intelligence",
+            "year": "2020",
+            "citation_priority": true,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "sql": "/* SORT_BY_CITATIONS */ SELECT id, title, author, pub_date, venue, type FROM papers WHERE (title ILIKE '%artificial intelligence%' OR title ILIKE '%AI %' OR title ILIKE '% AI %' OR title ILIKE '%machine intelligence%') AND pub_date >= '2020-01-01' LIMIT 5",
+          "valid": true
+        },
+        {
+          "query": "neural networks published in 2023",
+          "components": {
+            "topic": "neural networks",
+            "year": "2023",
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "sql": "SELECT id, title, author, pub_date, venue, type FROM papers WHERE (title ILIKE '%neural network%' OR title ILIKE '%neural networks%' OR title ILIKE '%deep learning%' OR title ILIKE '%CNN%' OR title ILIKE '%RNN%' OR title ILIKE '%LSTM%') AND pub_date >= '2023-01-01' LIMIT 5",
+          "valid": true
+        },
+        {
+          "query": "computer vision research with citations",
+          "components": {
+            "topic": "computer vision",
+            "year": null,
+            "citation_priority": true,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "sql": "/* SORT_BY_CITATIONS */ SELECT id, title, author, pub_date, venue, type FROM papers WHERE (title ILIKE '%computer vision%' OR title ILIKE '%image recognition%' OR title ILIKE '%object detection%' OR title ILIKE '%image classification%') LIMIT 5",
+          "valid": true
+        },
+        {
+          "query": "deep learning optimization techniques",
+          "components": {
+            "topic": "deep learning",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "sql": "SELECT id, title, author, pub_date, venue, type FROM papers WHERE title ILIKE '%deep learning%' LIMIT 5",
+          "valid": true
+        },
+        {
+          "query": "quantum computing applications since 2021",
+          "components": {
+            "topic": "quantum computing",
+            "year": "2021",
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "sql": "SELECT id, title, author, pub_date, venue, type FROM papers WHERE (title ILIKE '%quantum%' OR title ILIKE '%qubit%' OR title ILIKE '%quantum computer%' OR title ILIKE '%quantum algorithm%') AND pub_date >= '2021-01-01' LIMIT 5",
+          "valid": true
+        },
+        {
+          "query": "natural language processing papers",
+          "components": {
+            "topic": "natural language processing",
+            "year": null,
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "sql": "SELECT id, title, author, pub_date, venue, type FROM papers WHERE (title ILIKE '%natural language%' OR title ILIKE '%nlp%' OR title ILIKE '%language model%' OR title ILIKE '%text mining%' OR title ILIKE '%sentiment analysis%') LIMIT 5",
+          "valid": true
+        },
+        {
+          "query": "robotics systems with high impact",
+          "components": {
+            "topic": "robotics",
+            "year": null,
+            "citation_priority": true,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "sql": "/* SORT_BY_CITATIONS */ SELECT id, title, author, pub_date, venue, type FROM papers WHERE title ILIKE '%robotics%' LIMIT 5",
+          "valid": true
+        },
+        {
+          "query": "cybersecurity research from recent years",
+          "components": {
+            "topic": "cybersecurity",
+            "year": "2020",
+            "citation_priority": false,
+            "specific_paper_lookup": false,
+            "specific_paper_title": null,
+            "result_count": 5,
+            "want_summary": false
+          },
+          "sql": "SELECT id, title, author, pub_date, venue, type FROM papers WHERE title ILIKE '%cybersecurity%' AND pub_date >= '2020-01-01' LIMIT 5",
+          "valid": true
+        }
+      ]
+    },
+    "database_performance": {
+      "avg_response_time": 0.14591426849365235,
+      "min_response_time": 0.08475399017333984,
+      "max_response_time": 0.20668888092041016,
+      "success_rate": 100.0,
+      "successful_queries": 5,
+      "total_queries": 5,
+      "target_time_range": "2-5 seconds",
+      "status": "NEEDS_IMPROVEMENT"
+    },
+    "citation_integration": {
+      "success_rate": 100.0,
+      "successful_retrievals": 4,
+      "total_attempts": 4,
+      "target": 96.0,
+      "status": "PASS"
+    },
+    "pipeline_performance": {
+      "success_rate": 100.0,
+      "successful_pipelines": 3,
+      "total_queries": 3,
+      "avg_pipeline_time": 1.086912711461385,
+      "target": 96.0,
+      "status": "PASS"
+    }
+  }
+}

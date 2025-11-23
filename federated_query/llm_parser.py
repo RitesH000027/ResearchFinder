@@ -10,6 +10,43 @@ GROQ_API_BASE_URL = "https://api.groq.com/openai/v1"
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GROQ_MODEL = "llama-3.1-8b-instant"  # Current free model
 
+def rewrite_query_with_llm(query: str) -> str:
+    """Rewrite and improve query clarity using LLM before pattern matching.
+    
+    This function takes a natural language query and rewrites it to be more
+    structured and clear, making it easier for pattern matching to succeed.
+    """
+    if not GROQ_API_KEY:
+        print("[!] Groq API key not found - skipping query rewriting")
+        return query  # Return original query if no API key
+    
+    prompt = f"""Rewrite this research query to be clearer and more structured while preserving the original intent and requirements.
+
+Original Query: "{query}"
+
+Rules:
+1. Keep the same topic/subject matter
+2. Preserve specific requirements like "most cited", "with summaries", "recent papers", etc.
+3. Make the query more grammatically clear
+4. Use standard academic terminology
+5. Keep it concise but comprehensive
+6. Don't add requirements that weren't in the original
+
+Rewritten Query:"""
+
+    try:
+        result = _call_groq_api(prompt, max_tokens=150)
+        if result and len(result.strip()) > 10:  # Basic validation
+            rewritten = result.strip().strip('"').strip("'")
+            print(f"[>] Query rewritten: '{query}' → '{rewritten}'")
+            return rewritten
+        else:
+            print("[!] Query rewriting failed - using original query")
+            return query
+    except Exception as e:
+        print(f"[!] Query rewriting error: {e} - using original query")
+        return query
+
 def _call_groq_api(prompt: str, max_tokens: int = 256) -> Optional[str]:
     """Call Groq AI API for text generation (Free)."""
     if not GROQ_API_KEY:

@@ -78,21 +78,36 @@ def postprocess_with_llm(papers: Union[List[str], List[Any]], instruction: str) 
     # Create comprehensive analysis prompt
     papers_list = "\n".join([f"{i+1}. {paper}" for i, paper in enumerate(papers_text)])
     
-    prompt = f"""Analyze these research papers and {instruction}:
+    prompt = f"""As an expert research analyst, provide a comprehensive analysis of these research papers for {instruction}:
 
 {papers_list}
 
-Please provide:
-1. Key research themes and trends
-2. Methodological approaches
-3. Notable findings or innovations
-4. Research gaps or future directions
-5. Citation impact analysis (if citation counts provided)
+Generate a detailed research summary with the following sections:
 
-Keep the analysis concise but insightful (2-3 paragraphs maximum)."""
+**RESEARCH OVERVIEW & THEMES:**
+- Identify main research domains and emerging themes
+- Highlight cross-cutting methodological approaches
+- Note publication timeline and research evolution
 
-        # Call Groq AI for analysis
-    analysis = _call_groq_analysis(prompt, max_tokens=400)    # Validate and return analysis
+**KEY FINDINGS & INNOVATIONS:**
+- Summarize major breakthroughs or novel contributions
+- Identify methodological innovations and technical advances
+- Highlight practical applications and industry impact
+
+**RESEARCH LANDSCAPE ANALYSIS:**
+- Analyze citation patterns and research impact
+- Identify leading research venues and publication trends
+- Note collaboration patterns and geographic distribution
+
+**FUTURE DIRECTIONS & GAPS:**
+- Identify research gaps and unexplored areas
+- Suggest future research directions based on current trends
+- Highlight emerging challenges and opportunities
+
+Provide detailed, insightful analysis in 4-5 well-structured paragraphs that would be valuable for academic presentations and research planning."""
+
+        # Call Groq AI for comprehensive analysis
+    analysis = _call_groq_analysis(prompt, max_tokens=800)    # Validate and return analysis
     if len(analysis) > 50 and "error" not in analysis.lower()[:20]:
         return analysis
     else:

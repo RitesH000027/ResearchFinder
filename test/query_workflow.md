@@ -47,13 +47,13 @@ STEP 6: Citation Enhancement (citation_analysis.py)
 ---------------------------------------------------
 - Takes paper IDs from database results
 - Converts ID format: meta:br/xxxxx → omid:br/xxxxx
-- Makes HTTP requests to secondary machine citation API
+- Makes HTTP requests to remote citation API
 - Retrieves citation counts for each paper
 
-STEP 7: Secondary API Call (citation_server.py - on secondary machine)
+STEP 7: Remote API Call (citation_server.py - on remote machine)
 ----------------------------------------------------------------------
 - Receives citation lookup requests via REST API
-- Queries secondary PostgreSQL database (4.9M citations)
+- Queries remote PostgreSQL database (4.9M citations)
 - Returns citation data including counts and citing papers
 - Handles bulk requests for efficiency
 
@@ -120,7 +120,7 @@ Primary Machine:
 - PostgreSQL database with 76.3M papers
 - AI processing and analysis
 
-Secondary Machine: 
+Remote Machine: 
 - Citation API server (Flask)
 - PostgreSQL database with 4.9M citations
 - RESTful citation lookup service
