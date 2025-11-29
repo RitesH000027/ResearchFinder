@@ -174,9 +174,10 @@ def get_result_statistics(papers: List[Dict[str, Any]]) -> Dict[str, Any]:
             venue = paper.get('venue')
             stats['venues'][venue] = stats['venues'].get(venue, 0) + 1
         
-        # Track citation count
-        if paper.get('citation_count'):
-            stats['citation_count'] += paper.get('citation_count', 0)
+        # Track citation count - only count if citation_count exists and is > 0
+        citation_count = paper.get('citation_count', 0)
+        if citation_count and citation_count > 0:
+            stats['citation_count'] += citation_count
     
     # Calculate the average citations per paper
     if stats['total_papers'] > 0:
@@ -204,18 +205,14 @@ def print_summary_statistics(papers: List[Dict[str, Any]], query: str) -> None:
     
     stats = get_result_statistics(papers)
     
-    # Check if we're using simulated citation data
-    using_simulated = any(paper.get('citation_source') == 'simulated' for paper in papers if 'citation_source' in paper)
+    # All citation data is now real from secondary machine
     
     print(f"\n--- Summary Statistics for Query: \"{query}\" ---")
     print(f"Total papers found: {stats['total_papers']}")
     
-    # Only display citation stats if we have real citation data
-    if not using_simulated:
-        print(f"Total citations: {stats['citation_count']}")
-        print(f"Average citations per paper: {stats['avg_citations']:.2f}")
-    else:
-        print("Citation data unavailable - citation counts not shown")
+    # All citation data is real now, always show stats
+    print(f"Total citations: {stats['citation_count']}")
+    print(f"Average citations per paper: {stats['avg_citations']:.2f}")
     
     print("\nPublication Years:")
     for year, count in list(stats['years'].items())[:5]:  # Show top 5 years

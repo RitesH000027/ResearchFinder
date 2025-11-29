@@ -64,7 +64,7 @@ def _call_groq_api(prompt: str, max_tokens: int = 256) -> Optional[str]:
             "messages": [
                 {
                     "role": "system",
-                    "content": "You are an expert SQL generator for academic paper databases. Generate clean, syntactically correct PostgreSQL queries. Only return the SQL query without explanations."
+                    "content": "You are an expert at rewriting research queries to be clearer and more structured. Rewrite queries to improve clarity while preserving all original requirements and intent. Return only the rewritten query text."
                 },
                 {
                     "role": "user",

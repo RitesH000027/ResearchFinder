@@ -7,24 +7,47 @@ from typing import Dict, Any, List, Optional
 
 def build_topic_condition(topic: str) -> str:
     """
-    Create SQL condition for a research topic, with special handling for common research areas.
+    Create SQL condition for a research topic, with special handling for common research areas and misspellings.
     Returns a SQL condition string for use in WHERE clause.
     """
     if not topic:
         return ""
+    
+    topic_lower = topic.lower()
+        
+    # Misspelling correction mapping
+    misspelling_map = {
+        'machien learning': 'machine learning',
+        'machin learning': 'machine learning', 
+        'masheen learning': 'machine learning',
+        'artifical intelligence': 'artificial intelligence',
+        'artficial intelligence': 'artificial intelligence',
+        'artificial intellgence': 'artificial intelligence',
+        'neaural network': 'neural network',
+        'neaural networks': 'neural networks',
+        'deep learnign': 'deep learning',
+        'dep learning': 'deep learning',
+        'quantam computing': 'quantum computing',
+        'quantum computng': 'quantum computing',
+        'computor vision': 'computer vision',
+        'natrual language processing': 'natural language processing'
+    }
+    
+    # Apply spelling correction
+    normalized_topic = misspelling_map.get(topic_lower, topic_lower)
         
     # My solution for handling domain-specific queries with synonyms and related terms
-    if "neural network" in topic.lower() or "neural networks" in topic.lower():
+    if "neural network" in normalized_topic or "neural networks" in normalized_topic:
         return "(title ILIKE '%neural network%' OR title ILIKE '%neural networks%' OR title ILIKE '%deep learning%' OR title ILIKE '%CNN%' OR title ILIKE '%RNN%' OR title ILIKE '%LSTM%')"
-    elif "machine learning" in topic.lower():
+    elif "machine learning" in normalized_topic:
         return "(title ILIKE '%machine learning%' OR title ILIKE '%ml%' OR title ILIKE '%data mining%' OR title ILIKE '%supervised learning%' OR title ILIKE '%classification%')"
-    elif "quantum computing" in topic.lower() or "quantum computer" in topic.lower():
+    elif "quantum computing" in normalized_topic or "quantum computer" in normalized_topic:
         return "(title ILIKE '%quantum%' OR title ILIKE '%qubit%' OR title ILIKE '%quantum computer%' OR title ILIKE '%quantum algorithm%')"
-    elif "natural language processing" in topic.lower() or "nlp" in topic.lower():
+    elif "natural language processing" in normalized_topic or "nlp" in normalized_topic:
         return "(title ILIKE '%natural language%' OR title ILIKE '%nlp%' OR title ILIKE '%language model%' OR title ILIKE '%text mining%' OR title ILIKE '%sentiment analysis%')"
-    elif "artificial intelligence" in topic.lower() or "ai" == topic.lower():
+    elif "artificial intelligence" in normalized_topic or "ai" == normalized_topic:
         return "(title ILIKE '%artificial intelligence%' OR title ILIKE '%AI %' OR title ILIKE '% AI %' OR title ILIKE '%machine intelligence%')"
-    elif "computer vision" in topic.lower() or "image recognition" in topic.lower():
+    elif "computer vision" in normalized_topic or "image recognition" in normalized_topic:
         return "(title ILIKE '%computer vision%' OR title ILIKE '%image recognition%' OR title ILIKE '%object detection%' OR title ILIKE '%image classification%')"
     else:
         # For topics without special handling, use a direct ILIKE match
@@ -40,7 +63,7 @@ def build_year_condition(year: str) -> str:
     if not year:
         return ""
     
-    return f"pub_date >= '{year}-01-01'"
+    return f"pub_date >= '{year}-01-01' AND pub_date <= '2025-12-31'"
 
 def build_specific_paper_query(paper_title: str, result_count: int = 5) -> str:
     """
@@ -54,7 +77,7 @@ def build_specific_paper_query(paper_title: str, result_count: int = 5) -> str:
     
     # Sanitize the paper title to prevent SQL injection
     sanitized_title = paper_title.replace("'", "''")
-    return f"SELECT id, title, author, pub_date, venue, type FROM papers WHERE title ILIKE '%{sanitized_title}%' LIMIT {result_count}"
+    return f"SELECT id, title, author, pub_date, venue, type FROM papers WHERE title ILIKE '%{sanitized_title}%' AND pub_date <= '2025-12-31' LIMIT {result_count}"
 
 def build_fallback_keyword_query(query: str) -> str:
     """
@@ -105,6 +128,9 @@ def build_sql_query(parsed_query: Dict[str, Any], original_query: str) -> str:
     year = parsed_query.get('year')
     if year:
         conditions.append(build_year_condition(year))
+    else:
+        # Always add date validation to filter out invalid future dates
+        conditions.append("pub_date <= '2025-12-31'")
     
     # Add citation priority marker if needed
     if parsed_query.get('citation_priority'):
@@ -120,6 +146,11 @@ def build_sql_query(parsed_query: Dict[str, Any], original_query: str) -> str:
     
     # Use the user-specified count or default to 5
     result_count = parsed_query.get('result_count', 5)
+    
+    # Add ORDER BY for citation queries to ensure consistent results
+    if parsed_query.get('citation_priority'):
+        sql += " ORDER BY pub_date DESC"
+    
     sql += f" LIMIT {result_count}"
     
     return sql

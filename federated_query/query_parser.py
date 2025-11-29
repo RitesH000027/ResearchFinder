@@ -188,9 +188,12 @@ def extract_result_count(query: str) -> int:
     count_patterns = [
         r'(?:find|get|retrieve|show|give me)\s+(\d+)\s+(?:papers|articles|results)',
         r'top\s+(\d+)\s+(?:papers|articles|results)',
+        r'top\s+(\d+)\s+(?:most\s+)?(?:cited|relevant|recent)\s+(?:papers|articles)',
+        r'(?:find|show)?\s*(?:the\s+)?top\s+(\d+)\s+most\s+cited\s+(?:papers|articles)',
         r'first\s+(\d+)\s+(?:papers|articles|results)',
         r'(\d+)\s+(?:papers|articles|results)\s+(?:about|on|for)',
-        r'(\d+)\s+(?:most )?(?:relevant|recent|cited)\s+(?:papers|articles)',
+        r'(\d+)\s+(?:most\s+)?(?:relevant|recent|cited)\s+(?:papers|articles)',
+        r'exactly\s+(\d+)\s+(?:papers?|articles?)',
     ]
     
     for pattern in count_patterns:

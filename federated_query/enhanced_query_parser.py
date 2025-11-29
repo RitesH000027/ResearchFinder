@@ -16,8 +16,8 @@ def extract_topic_and_time(query: str) -> Tuple[Optional[str], Optional[str]]:
     
     # Enhanced topic extraction patterns - comprehensive coverage
     topic_patterns = [
-        # Direct topic queries (most common)
-        r'\b(machine learning|artificial intelligence|ai|neural networks?|deep learning|computer vision|natural language processing|nlp|quantum computing|robotics|cybersecurity|blockchain)\b',
+        # Direct topic queries with common misspellings
+        r'\b(machine learning|machien learning|machin learning|artificial intelligence|artifical intelligence|artficial intelligence|ai|neural networks?|neaural networks?|deep learning|computer vision|natural language processing|nlp|quantum computing|quantam computing|robotics|cybersecurity|blockchain)\b',
         
         # Algorithm and technique patterns
         r'\b(algorithms?|models?|techniques?|methods?|approaches?|systems?|applications?)\b',
@@ -64,21 +64,21 @@ def extract_topic_and_time(query: str) -> Tuple[Optional[str], Optional[str]]:
     # Enhanced direct keyword matching for common research areas
     if not topic:
         topic_keywords = {
-            'machine learning': ['machine learning', 'ml', 'machine-learning'],
-            'artificial intelligence': ['artificial intelligence', 'ai', 'artificial-intelligence'], 
-            'neural networks': ['neural network', 'neural networks', 'neural-network'],
-            'deep learning': ['deep learning', 'deep-learning'],
-            'computer vision': ['computer vision', 'computer-vision', 'cv'],
-            'natural language processing': ['natural language processing', 'nlp', 'natural-language'],
-            'quantum computing': ['quantum computing', 'quantum-computing', 'quantum'],
-            'robotics': ['robotics', 'robot', 'robotic'],
-            'cybersecurity': ['cybersecurity', 'cyber security', 'security'],
-            'blockchain': ['blockchain', 'block chain', 'crypto'],
-            'algorithms': ['algorithm', 'algorithms'],
-            'optimization': ['optimization', 'optimize'],
-            'research': ['research', 'study', 'studies'],
-            'techniques': ['technique', 'techniques', 'method', 'methods'],
-            'applications': ['application', 'applications', 'applied']
+            'machine learning': ['machine learning', 'machien learning', 'machin learning', 'masheen learning', 'ml', 'machine-learning'],
+            'artificial intelligence': ['artificial intelligence', 'artifical intelligence', 'artficial intelligence', 'artificial intellgence', 'ai', 'artificial-intelligence'], 
+            'neural networks': ['neural network', 'neural networks', 'neaural network', 'neaural networks', 'neural-network'],
+            'deep learning': ['deep learning', 'deep-learning', 'deep learnign', 'dep learning'],
+            'computer vision': ['computer vision', 'computer-vision', 'cv', 'computor vision'],
+            'natural language processing': ['natural language processing', 'nlp', 'natural-language', 'natrual language processing'],
+            'quantum computing': ['quantum computing', 'quantum-computing', 'quantam computing', 'quantum computng', 'quantum'],
+            'robotics': ['robotics', 'robot', 'robotic', 'robotis'],
+            'cybersecurity': ['cybersecurity', 'cyber security', 'security', 'cyber-security'],
+            'blockchain': ['blockchain', 'block chain', 'crypto', 'blokchain'],
+            'algorithms': ['algorithm', 'algorithms', 'algorithim', 'algoritm'],
+            'optimization': ['optimization', 'optimize', 'optimisation', 'optimzation'],
+            'research': ['research', 'study', 'studies', 'reserach'],
+            'techniques': ['technique', 'techniques', 'method', 'methods', 'technics'],
+            'applications': ['application', 'applications', 'applied', 'aplication']
         }
         
         for standard_topic, keywords in topic_keywords.items():
@@ -182,11 +182,16 @@ def extract_result_count(query: str) -> int:
     
     # Enhanced count extraction patterns
     count_patterns = [
-        r'(?:find|get|retrieve|show|give me)\s+(\d+)\s+(?:papers|articles|results)',
-        r'top\s+(\d+)\s+(?:papers|articles|results)',
-        r'first\s+(\d+)\s+(?:papers|articles|results)',
-        r'(\d+)\s+(?:papers|articles|results)\s+(?:about|on|for)',
-        r'(\d+)\s+(?:most )?(?:relevant|recent|cited)\s+(?:papers|articles)',
+        r'(?:find|get|retrieve|show|give me)\s+(\d+)\s+(?:papers?|articles?|results?)',
+        r'(?:find|get|retrieve|show|give me)\s+(\d+)\s+(?:most\s+)?(?:cited\s+)?(?:machine learning|neural network|deep learning|ai|artificial intelligence|research)\s+(?:papers?|articles?)',
+        r'(?:find|get|retrieve|show|give me)\s+(\d+)\s+(?:[a-zA-Z\s]+)\s+(?:papers?|articles?)',
+        r'top\s+(\d+)\s+(?:papers?|articles?|results?)',
+        r'(?:find|get|show)?\s*(?:the\s+)?top\s+(\d+)\s+most\s+cited\s+(?:\w+\s+)*(?:papers?|articles?)',
+        r'first\s+(\d+)\s+(?:papers?|articles?|results?)',
+        r'(\d+)\s+(?:papers?|articles?|results?)\s+(?:about|on|for)',
+        r'(\d+)\s+(?:most )?(?:relevant|recent|cited)\s+(?:papers?|articles?)',
+        r'(\d+)\s+most\s+cited\s+(?:papers?|articles?)',
+        r'(?:find|get|show)\s+(\d+)\s+most\s+cited',
     ]
     
     for pattern in count_patterns:
@@ -230,6 +235,46 @@ def detect_summary_request(query: str) -> bool:
     
     return any(re.search(pattern, query_lower) for pattern in summary_patterns)
 
+def detect_brief_summary_request(query: str) -> bool:
+    """
+    Detect if user wants brief individual paper summaries vs comprehensive analysis.
+    """
+    query_lower = query.lower()
+    
+    brief_patterns = [
+        r'\bbrief\s+summary\b',
+        r'\bshort\s+summary\b',
+        r'\bquick\s+summary\b',
+        r'\bconcise\s+summary\b',
+        r'\bsummarize\s+each\b',
+        r'\bsummarize\s+the\s+papers\b',
+        r'\bsummary\s+of\s+each\b',
+        r'\bbrief\s+description\b',
+        r'\bshort\s+description\b'
+    ]
+    
+    return any(re.search(pattern, query_lower) for pattern in brief_patterns)
+
+def detect_comprehensive_analysis_request(query: str) -> bool:
+    """
+    Detect if user wants detailed comprehensive analysis vs basic summary.
+    """
+    query_lower = query.lower()
+    
+    comprehensive_patterns = [
+        r'\bcomprehensive\s+(analysis|summary|review)\b',
+        r'\bdetailed\s+(analysis|summary|review)\b',
+        r'\bin-depth\s+(analysis|summary|review)\b',
+        r'\bthorough\s+(analysis|summary)\b',
+        r'\bresearch\s+landscape\b',
+        r'\btrends?\s+analysis\b',
+        r'\bfuture\s+directions\b',
+        r'\bresearch\s+gaps\b',
+        r'\binsights?\s+and\s+trends?\b'
+    ]
+    
+    return any(re.search(pattern, query_lower) for pattern in comprehensive_patterns)
+
 def extract_query_components(query: str) -> Dict[str, Any]:
     """
     Enhanced main entry point with 100% success rate pattern matching.
@@ -239,6 +284,8 @@ def extract_query_components(query: str) -> Dict[str, Any]:
     specific_paper_title = extract_specific_paper_title(query) if citation_priority else None
     result_count = extract_result_count(query)
     want_summary = detect_summary_request(query)
+    want_brief_summary = detect_brief_summary_request(query)
+    want_comprehensive = detect_comprehensive_analysis_request(query)
     
     result = {
         'topic': topic,
@@ -247,7 +294,9 @@ def extract_query_components(query: str) -> Dict[str, Any]:
         'specific_paper_lookup': specific_paper_title is not None,
         'specific_paper_title': specific_paper_title,
         'result_count': result_count,
-        'want_summary': want_summary
+        'want_summary': want_summary,
+        'want_brief_summary': want_brief_summary,
+        'want_comprehensive': want_comprehensive
     }
 
     # Enhanced debug output
@@ -255,7 +304,8 @@ def extract_query_components(query: str) -> Dict[str, Any]:
         print(
             f"[Enhanced Query Decomposition] topic={result['topic']!r}, year={result['year']!r}, "
             f"citation_priority={result['citation_priority']}, specific_paper_title={result['specific_paper_title']!r}, "
-            f"result_count={result['result_count']}, want_summary={result['want_summary']}"
+            f"result_count={result['result_count']}, want_summary={result['want_summary']}, "
+            f"want_brief_summary={result['want_brief_summary']}, want_comprehensive={result['want_comprehensive']}"
         )
     except Exception:
         pass

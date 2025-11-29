@@ -18,7 +18,7 @@ if current_dir not in sys.path:
 
 # Import the newly refactored modules - using relative imports
 # since we're already in the federated_query package
-from .query_parser import extract_query_components
+from .enhanced_query_parser import extract_query_components
 from .sql_builder import build_sql_query
 from .citation_analysis import CitationClient
 from .results_processor import (
@@ -65,17 +65,17 @@ except ImportError as e:
     # Try pattern-based SQL generation first (Your Hybrid Approach)
     if parsed_query.get('topic') or parsed_query.get('citation_priority'):
         print("[>] Using pattern-based SQL generation (Primary)")
-        structured_query = build_sql_query(parsed_query, query)
+        structured_query = build_sql_query(parsed_query, original_query)
     else:
         print("[!] Pattern matching insufficient - trying LLM SQL generation")
         # Fallback to LLM if pattern matching didn't extract enough info
-        llm_parsed = parse_query_with_llm(query)
+        llm_parsed = parse_query_with_llm(original_query)
         structured_query = llm_parsed.get('structured', '').strip()
         
         # Final fallback to basic pattern-based SQL if LLM also fails
         if not structured_query or ('citations' in structured_query.lower() and 'join' in structured_query.lower()):
             print("[!] LLM SQL generation failed - using basic pattern fallback")
-            structured_query = build_sql_query(parsed_query, query)
+            structured_query = build_sql_query(parsed_query, original_query)
     
     print(f"   Generated SQL: {structured_query}")
 
@@ -98,15 +98,14 @@ def run_query():
     
     # Rewrite query with LLM for better structure
     rewritten_query = rewrite_query_with_llm(original_query)
-    query = rewritten_query  # Use rewritten query for rest of pipeline
     
     # ============================================================================
     # STEP 2: Pattern-Based Query Decomposition (Primary Method)
     # ============================================================================
     print(f"\n[*] STEP 2: PATTERN-BASED DECOMPOSITION")
     
-    # Parse the rewritten query to extract structured components
-    parsed_query = extract_query_components(query)
+    # Parse the ORIGINAL query to extract structured components (not the rewritten SQL!)
+    parsed_query = extract_query_components(original_query)
     
     # ============================================================================
     # REQUIREMENT (a): Query decomposition results are displayed
@@ -154,17 +153,17 @@ def run_query():
     # Try pattern-based SQL generation first (Your Hybrid Approach)
     if parsed_query.get('topic') or parsed_query.get('citation_priority'):
         print("[>] Using pattern-based SQL generation (Primary)")
-        structured_query = build_sql_query(parsed_query, query)
+        structured_query = build_sql_query(parsed_query, original_query)
     else:
         print("[!] Pattern matching insufficient - trying LLM SQL generation")
         # Fallback to LLM if pattern matching didn't extract enough info
-        llm_parsed = parse_query_with_llm(query)
+        llm_parsed = parse_query_with_llm(original_query)
         structured_query = llm_parsed.get('structured', '').strip()
         
         # Final fallback to basic pattern-based SQL if LLM also fails
         if not structured_query or ('citations' in structured_query.lower() and 'join' in structured_query.lower()):
             print("[!] LLM SQL generation failed - using basic pattern fallback")
-            structured_query = build_sql_query(parsed_query, query)
+            structured_query = build_sql_query(parsed_query, original_query)
     
     print(f"   Generated SQL: {structured_query}")
     
@@ -182,7 +181,7 @@ def run_query():
     
     # For demonstration: Show federated approach concept
     citations_results = []  # Will be populated by citation API
-    authors_results = []    # Simulated for demo
+    authors_results = []    # Available via federated approach
     
     print(f"[*] Query Results Summary:")
     print(f"   Papers: {len(papers_results)} from primary database")
@@ -202,8 +201,8 @@ def run_query():
     if paper_ids:
         print(f"[>] Finding citations for {len(paper_ids)} papers...")
         
-        # Determine how many papers to process for citations based on priority
-        sample_size = 10 if citation_priority else 5
+        # Use the user-requested count instead of hardcoded limits
+        sample_size = min(parsed_query.get('result_count', 5), len(papers_results))
         
         try:
             # Process each paper and add citation data
@@ -232,11 +231,10 @@ def run_query():
                         paper_dict['citation_count'] = citation_data.get('citation_count', 0)
                         paper_dict['citations'] = citation_data.get('citations', [])
                         paper_dict['citation_source'] = citation_data.get('source', 'unknown')
+                        print(f"Paper {paper_dict['title'][:50]}... - Citation data stored: count={paper_dict['citation_count']}, source={paper_dict['citation_source']}")
                         
                         # Only include citation data in output if it's from a real source
-                        if citation_data.get('source') == 'simulated':
-                            # Don't include simulated citation counts in individual paper display
-                            paper_dict.pop('citation_count', None)
+                        # All citation data is now real - no filtering needed
                     
                     papers_with_citations.append(paper_dict)
             
@@ -248,10 +246,12 @@ def run_query():
         except Exception as e:
             print(f"[!] Error processing citations: {e}")
     
-    # Print the raw results for reference
+    # Print the raw results for reference  
     print("\n=== PAPERS FOUND ===")
     if papers_results:
-        for i, row in enumerate(papers_results[:10]):  # Show up to 10 papers
+        requested_count = parsed_query.get('result_count', 5)
+        display_count = min(requested_count, len(papers_results))
+        for i, row in enumerate(papers_results[:display_count]):
             title = str(row[1])[:100] if len(row) > 1 else 'N/A'
             pub_date = str(row[3])[:10] if len(row) > 3 else 'N/A'
             print(f"[{i+1}] {title} ({pub_date})")
@@ -287,36 +287,46 @@ def run_query():
     # Extract topic for display
     topic = parsed_query.get('topic', 'this research area')
     
-    # Display formatted results
-    print(f"Found {len(papers_results)} papers about {topic or 'this research area'} published {time_period}.\n")
+    # Display formatted results  
+    requested_count = parsed_query.get('result_count', 5)
+    actual_count = min(requested_count, len(papers_results))
+    print(f"Found {actual_count} papers about {topic or 'this research area'} published {time_period}.\n")
     
     # Print each paper in a readable format
-    for i, paper in enumerate(papers_with_citations[:10]):
+    requested_count = parsed_query.get('result_count', 5)
+    display_count = min(requested_count, len(papers_with_citations))
+    for i, paper in enumerate(papers_with_citations[:display_count]):
         print(f"[{i+1}] Title: {paper.get('title', 'N/A')}")
         print(f"    Date: {paper.get('pub_date', 'N/A')}")
         author = paper.get('author', '')
         if author:
             print(f"    Author: {author[:100]}")
-        # Only show citation counts from real sources (not simulated)
-        if citation_priority and 'citation_count' in paper and paper.get('citation_source') != 'simulated':
-            print(f"    Citations: {paper.get('citation_count', 0)}")
+        citations = paper.get('citation_count', 0)
+        print(f"    Citations: {citations}")
+        # Show citation source information if available
+        if paper.get('citation_source', 'unknown') != 'unknown':
+            print(f"    Citation Source: {paper.get('citation_source')}")
         print("")
     
     # Only show research analysis if explicitly requested
     want_summary = parsed_query.get('want_summary', False)
+    want_brief_summary = parsed_query.get('want_brief_summary', False)
     
     if want_summary:
-        print("\n=== INTEGRATED FEDERATED ANALYSIS ===")
+        # Aggregate citation data from papers_with_citations (needed for all summary types)
+        total_citations = sum(paper.get('citation_count', 0) for paper in papers_with_citations)
+        unique_authors = set()
+        for paper in papers_with_citations:
+            authors = paper.get('authors', [])
+            if isinstance(authors, list):
+                unique_authors.update(authors)
+            elif isinstance(authors, str):
+                unique_authors.update([authors])
         
-        # ============================================================================
-        # REQUIREMENT (b): Rewritten LLM prompt using decomposed query results
-        # ============================================================================
-        rewritten_analysis_prompt = rewrite_prompt_for_analysis(parsed_query, papers_results)
-        print(f"Analysis prompt rewritten based on query decomposition")
+        citations_results = [{'total_citations': total_citations}] if total_citations > 0 else []
+        authors_results = [{'unique_authors': len(unique_authors)}] if unique_authors else []
         
-        # ============================================================================
-        # REQUIREMENT (c): Integration of LLM results with federated SQL data
-        # ============================================================================
+        # Create integrated prompt (needed for all summary types)
         integrated_prompt = create_integrated_prompt(
             decomposed_query=parsed_query,
             papers_results=papers_with_citations,
@@ -324,8 +334,61 @@ def run_query():
             authors_results=authors_results
         )
         
-        print(f"\n[>] INTEGRATING RESULTS FROM FEDERATED DATABASES:")
-        print(f"   Combining {len(papers_with_citations)} papers + {len(citations_results)} citations + {len(authors_results)} authors")
+        want_comprehensive = parsed_query.get('want_comprehensive', False)
+        
+        if want_brief_summary:
+            print("\n=== BRIEF PAPER SUMMARIES ===")
+            # Provide brief individual paper summaries
+            requested_count = parsed_query.get('result_count', 5)
+            papers_to_summarize = papers_with_citations[:requested_count]
+            
+            for i, paper in enumerate(papers_to_summarize, 1):
+                title = paper.get('title', 'Unknown Title')
+                year = paper.get('pub_date', 'N/A')
+                citations = paper.get('citation_count', 0)
+                abstract = paper.get('abstract', 'No abstract available')
+                
+                # Create brief summary (first 2 sentences of abstract + key info)
+                brief_abstract = '. '.join(abstract.split('. ')[:2]) + '.' if abstract and abstract != 'No abstract available' else 'No abstract available.'
+                
+                print(f"\n{i}. **{title}** ({year})")
+                print(f"   Citations: {citations}")
+                print(f"   Summary: {brief_abstract}")
+            
+            # Skip the comprehensive analysis for brief summaries
+            return
+        elif want_comprehensive or want_summary:
+            # If user wants any kind of summary (including basic "summarize"), provide comprehensive analysis
+            print("\n=== COMPREHENSIVE RESEARCH ANALYSIS ===")
+            
+            # ============================================================================
+            # REQUIREMENT (b): Rewritten LLM prompt using decomposed query results
+            # ============================================================================
+            rewritten_analysis_prompt = rewrite_prompt_for_analysis(parsed_query, papers_results)
+            print(f"Analysis prompt rewritten based on query decomposition")
+            
+            print(f"\n[>] INTEGRATING RESULTS FROM FEDERATED DATABASES:")
+            print(f"   Combining {len(papers_with_citations)} papers + {total_citations} citations")
+        else:
+            # Only show basic summary if user didn't ask for any summary at all
+            print("\n=== RESEARCH SUMMARY ===")
+            requested_count = parsed_query.get('result_count', 5)
+            actual_count = min(requested_count, len(papers_with_citations))
+            papers_to_summarize = papers_with_citations[:actual_count]
+            total_citations_displayed = sum(paper.get('citation_count', 0) for paper in papers_to_summarize)
+            
+            print(f"Found {actual_count} papers with {total_citations_displayed} total citations")
+            print(f"Publication years: {', '.join(str(paper.get('pub_date', 'N/A'))[:4] for paper in papers_to_summarize)}")
+            print(f"Top papers by citation count:")
+            
+            for i, paper in enumerate(papers_to_summarize[:3], 1):
+                title = paper.get('title', 'Unknown Title')
+                citations = paper.get('citation_count', 0)
+                year = paper.get('pub_date', 'N/A')
+                print(f"  {i}. {title[:80]}{'...' if len(title) > 80 else ''} ({citations} citations, {year})")
+            
+            # Skip full analysis for basic summary
+            return
         
         # Try LLM analysis with integrated federated data
         try:
